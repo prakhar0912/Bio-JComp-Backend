@@ -6,7 +6,7 @@ const { json } = require('body-parser');
 const Entry = require('./models/Entry')
 
 const app = express()
-const uri = "mongodb://localhost:27017/BioDB"
+const uri = "mongodb://0.0.0.0:27017/SAPDB"
 
 app.use(bodyParser.json())
 
@@ -27,27 +27,24 @@ app.get("/", (req, res) => {
 
 app.post('/push', async (req, res) => {
     const entry = new Entry({
-        Gene_Name: req.body["Gene_Name"],
-        Transcript: req.body["Transcript"],
-        Census_Tier_1: req.body["Census_Tier_1"],
-        Sample_Name: req.body["Sample_Name"],
-        Sample_ID: req.body["Sample_ID"],
-        AA_Mutation: req.body["AA_Mutation"],
-        CDS_Mutation: req.body["CDS_Mutation"],
-        Primary_Tissue: req.body["Primary_Tissue"],
-        Tissue_Subtype_1: req.body["Tissue_Subtype_1"],
-        Tissue_Subtype_2: req.body["Tissue_Subtype_2"],
-        Histology: req.body["Histology"],
-        Histology_Subtype_1: req.body["Histology_Subtype_1"],
-        Histology_Subtype_2: req.body["Histology_Subtype_2"],
-        Pubmed_Id: req.body["Pubmed_Id"],
-        CGP_Study: req.body["CGP_Study"],
-        Somatic_Status: req.body["Somatic_Status"],
-        Sample_Type: req.body["Sample_Type"],
-        Zygosity: req.body["Zygosity"],
-        Genomic_Coordinates: req.body["Genomic_Coordinates"]
+        Sector: req.body["Sector"],
+        SID: req.body["SID"],
+        Physical_Hostname: req.body["Physical_Hostname"],
+        SAP_System_Type: req.body["SAP_System_Type"],
+        OS: req.body["OS"],
+        DB: req.body["DB"],
+        Threads: req.body["Threads"],
+        Cores: req.body["Cores"],
+        Sockets: req.body["Sockets"],
+        CPUs: req.body["CPUs"],
+        Main_RAM: req.body["Main_RAM"],
+        Swap_RAM: req.body["Swap_RAM"],
+        Total_RAM: req.body["Total_RAM"],
+        Instances: req.body["Instances"],
+        Local_Storage: req.body["Local_Storage"],
+        Kernel_Version: req.body["Kernel_Version"],
+        Patch_Number: req.body["Patch_Number"]
     })
-
     try {
         const savedEntry = await entry.save()
         res.status(200).json(savedEntry)
@@ -162,6 +159,62 @@ app.use("/entries", pagination(Entry), async (req, res) => {
     res.status(200).json(res.paginatedResults)
 })
 
+app.get("/filter", async (req, res) => {
+    try {
+        let queryStr = JSON.stringify(req.query)
+        console.log(queryStr)
+        queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, (match) => `$${match}`)
+        const queryObj = JSON.parse(queryStr)
+        let systems = []
+        if(queryObj["sort"]){
+            let sort = queryObj["sort"].split(",")
+            let sortBy = {}
+            if(sort[1]){
+                sortBy[sort[0]] = sort[1]
+            }
+            else{
+                sortBy[sort[0]] = 0
+            }
+            delete queryObj.sort
+            systems = await Entry.find(queryObj).sort(sortBy)
+        }
+        else{
+            systems = await Entry.find(queryObj).sort({"SID": 0})
+        }
+        res.status(200).json(systems)
+    }
+    catch(e){
+        res.status(500).json({ message: e.message })
+    }
+})
+
+
+app.get("/sectorwise", async (req, res) => {
+    try {
+        const aggregationResults = await Entry.aggregate(
+            [
+                {
+                    '$sort': {
+                        'SID': 1
+                    }
+                }, {
+                    '$group': {
+                        '_id': {
+                            'Sector': '$Sector'
+                        },
+                        'all': {
+                            '$push': '$$ROOT'
+                        }
+                    }
+                }
+            ]
+        )
+        res.status(200).json(aggregationResults)
+    } catch (e) {
+        res.status(500).json({ message: e.message })
+    }
+})
+
 app.patch("/update", async (req, res) => {
     const entry = await Entry.findById(req.body._id)
     let data = req.body
@@ -188,7 +241,7 @@ const processData = async (data, url) => {
             data[i] = data[i].split('\t')
         }
 
-        if(data.length == 2){
+        if (data.length == 2) {
             console.log(url)
         }
 
@@ -196,25 +249,22 @@ const processData = async (data, url) => {
 
         for (let i = 1; i < data.length - 1; i++) {
             const entry = new Entry({
-                Gene_Name: data[i][0],
-                Transcript: data[i][1],
-                Census_Tier_1: data[i][2],
-                Sample_Name: data[i][3],
-                Sample_ID: data[i][4],
-                AA_Mutation: data[i][5],
-                CDS_Mutation: data[i][6],
-                Primary_Tissue: data[i][7],
-                Tissue_Subtype_1: data[i][8],
-                Tissue_Subtype_2: data[i][9],
-                Histology: data[i][10],
-                Histology_Subtype_1: data[i][11],
-                Histology_Subtype_2: data[i][12],
-                Pubmed_Id: data[i][13],
-                CGP_Study: data[i][14],
-                Somatic_Status: data[i][15],
-                Sample_Type: data[i][16],
-                Zygosity: data[i][17],
-                Genomic_Coordinates: data[i][18]
+                SID: data[i][0],
+                Physical_Hostname: data[i][1],
+                SAP_System_Type: data[i][2],
+                OS: data[i][3],
+                DB: data[i][4],
+                Threads: data[i][5],
+                Cores: data[i][6],
+                Sockets: data[i][7],
+                CPUs: data[i][8],
+                Main_RAM: data[i][9],
+                Swap_RAM: data[i][10],
+                Total_RAM: data[i][11],
+                Instances: data[i][12],
+                Local_Storage: data[i][13],
+                Kernel_Version: data[i][14],
+                Patch_Number: data[i][15],
             })
 
             try {

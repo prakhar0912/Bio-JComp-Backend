@@ -1,11 +1,26 @@
 const fetch = require('node-fetch')
 let data = require('./data.json')
 
-console.log(data.yeah[0][1])
-let sentRequest = (i, j) => {
+let sentRequest = (d) => {
     return new Promise((res, rej) => {
         var raw = JSON.stringify({
-            "url": data.yeah[i][j]
+            "Sector": d["Sector"],
+            "SID": d["SID"],
+            "Physical_Hostname": d["Physical_Hostname"],
+            "SAP_System_Type": d["SAP_System_Type"],
+            "OS": d["OS"],
+            "DB": d["DB"],
+            "Threads": d["Threads"],
+            "Cores": d["Cores"],
+            "Sockets": d["Sockets"],
+            "CPUs": d["CPUs"],
+            "Main_RAM": d["Main_RAM"],
+            "Swap_RAM": d["Swap_RAM"],
+            "Total_RAM": d["Total_RAM"],
+            "Instances": d["Instances"],
+            "Local_Storage": d["Local_Storage"],
+            "Kernel_Version": d["Kernel_Version"],
+            "Patch_Number": d["Patch_Number"]
         });
 
         var requestOptions = {
@@ -15,10 +30,10 @@ let sentRequest = (i, j) => {
             redirect: 'follow'
         };
 
-        fetch("http://localhost:3000/url", requestOptions)
+        fetch("http://localhost:3000/push", requestOptions)
             .then(response => response.text())
             .then(result => {
-                console.log(result + " at " + i + "  " + j)
+                console.log(result)
                 res()
             })
             .catch(error => { console.log('error', error); res() });
@@ -28,10 +43,8 @@ let sentRequest = (i, j) => {
 
 let start = async () => {
 
-    for (let i = 0; i < 20; i++) {
-        for (let j = 0; j < data.yeah[i].length; j++) {
-            await sentRequest(i, j)
-        }
+    for (let i = 0; i < data.length; i++) {
+        await sentRequest(data[i])
     }
 }
 

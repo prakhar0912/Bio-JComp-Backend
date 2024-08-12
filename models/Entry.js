@@ -1,82 +1,74 @@
 const mongoose = require('mongoose')
 
 const EntrySchema = mongoose.Schema({
-    Gene_Name: {
+    Sector: {
         type: String,
         required: true
     },
-    Transcript: {
+    SID: {
         type: String,
         required: true
     },
-    Census_Tier_1: {
+    Physical_Hostname: {
         type: String,
         required: true
     },
-    Sample_Name: {
+    SAP_System_Type: {
         type: String,
-        required: true
+        required: false
     },
-    Sample_ID: {
+    OS: {
         type: String,
-        required: true
+        required: false
     },
-    AA_Mutation: {
+    DB: {
         type: String,
-        required: true
+        required: false
     },
-    CDS_Mutation: {
-        type: String,
-        required: true
+    Threads: {
+        type: Number,
+        required: false
     },
-    Primary_Tissue: {
-        type: String,
-        required: true
+    Cores: {
+        type: Number,
+        required: false
     },
-    Tissue_Subtype_1: {
-        type: String,
-        required: true
+    Sockets: {
+        type: Number,
+        required: false
     },
-    Tissue_Subtype_2: {
-        type: String,
-        required: true
+    CPUs: {
+        type: Number,
+        required: false
     },
-    Histology: {
+    Main_RAM: {
         type: String,
-        required: true
+        required: false
     },
-    Histology_Subtype_1: {
+    Swap_RAM: {
         type: String,
-        required: true
+        required: false
     },
-    Histology_Subtype_2: {
+    Total_RAM: {
         type: String,
-        required: true
+        required: false
     },
-    Pubmed_Id: {
+    Instances: {
         type: String,
-        required: true
+        required: false
     },
-    CGP_Study: {
-        type: String,
-        required: true
+    Local_Storage: {
+        type: Number,
+        required: false
     },
-    Somatic_Status: {
+    Kernel_Version: {
         type: String,
-        required: true
+        required: false
     },
-    Sample_Type: {
-        type: String,
-        required: true
+    Patch_Number: {
+        type: Number,
+        required: false
     },
-    Zygosity: {
-        type: String,
-        required: true
-    },
-    Genomic_Coordinates: {
-        type: String,
-        required: true
-    }
 })
 
 
